@@ -164,8 +164,8 @@ export default function game(state = initialState, action = {}) {
               [0, 0, 0, 0, 0, 0]
             ],
             nextPieces: [
-              Math.floor(Math.random() * 4 + 1),
-              Math.floor(Math.random() * 4 + 1)
+              [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)],
+              [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
             ]
           };
         case MOVE_RIGHT:
