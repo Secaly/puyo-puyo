@@ -40,6 +40,10 @@ const initialState = {
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0]
+  ],
+  nextPieces: [
+    [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)],
+    [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
   ]
 };
 
@@ -158,6 +162,10 @@ export default function game(state = initialState, action = {}) {
               [0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0],
               [0, 0, 0, 0, 0, 0]
+            ],
+            nextPieces: [
+              Math.floor(Math.random() * 4 + 1),
+              Math.floor(Math.random() * 4 + 1)
             ]
           };
         case MOVE_RIGHT:
@@ -208,18 +216,25 @@ export default function game(state = initialState, action = {}) {
                 id: 1,
                 x: 100,
                 y: -50,
-                color: Math.floor(Math.random() * 4 + 1),
+                color: state.nextPieces[0][0],
                 position: -1
               },
               {
                 id: 2,
                 x: 100,
                 y: 0,
-                color: Math.floor(Math.random() * 4 + 1),
+                color: state.nextPieces[0][1],
                 position: 0
               }
             ],
-            board: collision(state.piece, state.board)
+            board: collision(state.piece, state.board),
+            nextPieces: [
+              state.nextPieces[1],
+              [
+                Math.floor(Math.random() * 4 + 1),
+                Math.floor(Math.random() * 4 + 1)
+              ]
+            ]
           };
         case ROTATE_RIGHT:
           return {
@@ -264,18 +279,22 @@ export default function game(state = initialState, action = {}) {
             id: 1,
             x: 100,
             y: -50,
-            color: Math.floor(Math.random() * 4 + 1),
+            color: state.nextPieces[0][0],
             position: -1
           },
           {
             id: 2,
             x: 100,
             y: 0,
-            color: Math.floor(Math.random() * 4 + 1),
+            color: state.nextPieces[0][1],
             position: 0
           }
         ],
-        board: collision(action.piece, state.board)
+        board: collision(action.piece, state.board),
+        nextPieces: [
+          state.nextPieces[1],
+          [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
+        ]
       };
     default:
       return state;

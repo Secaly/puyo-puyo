@@ -92,17 +92,37 @@ class GamePage extends React.Component {
 
     const ctx = this.canvas.current.getContext('2d');
 
-    ctx.clearRect(0, 0, 300, 600);
+    ctx.clearRect(0, 0, 500, 600);
+    ctx.strokeRect(0, 0, 300, 600);
+    if (game.nextPieces) {
+      ctx.fillStyle = 'black';
+      ctx.font = '15px Arial';
+      ctx.fillText('Next pieces :', 350, 25);
+      ctx.fillStyle = COLOR[game.nextPieces[0][0]];
+      ctx.fillRect(350, 50, 50, 50);
+      ctx.strokeRect(350, 50, 50, 50);
+      ctx.fillStyle = COLOR[game.nextPieces[0][1]];
+      ctx.fillRect(350, 100, 50, 50);
+      ctx.strokeRect(350, 100, 50, 50);
+      ctx.fillStyle = COLOR[game.nextPieces[1][0]];
+      ctx.fillRect(450, 50, 50, 50);
+      ctx.strokeRect(450, 50, 50, 50);
+      ctx.fillStyle = COLOR[game.nextPieces[1][1]];
+      ctx.fillRect(450, 100, 50, 50);
+      ctx.strokeRect(450, 100, 50, 50);
+    }
     if (game.piece) {
       game.piece.forEach(item => {
         ctx.fillStyle = COLOR[item.color];
         ctx.fillRect(item.x, item.y, 50, 50);
+        ctx.strokeRect(item.x, item.y, 50, 50);
       });
       game.board.forEach((line, indexLine) => {
         line.forEach((cell, indexColumn) => {
           if (cell > 0) {
             ctx.fillStyle = COLOR[cell];
             ctx.fillRect(indexColumn * 50, indexLine * 50, 50, 50);
+            ctx.strokeRect(indexColumn * 50, indexLine * 50, 50, 50);
           }
         });
       });
@@ -112,12 +132,7 @@ class GamePage extends React.Component {
   render() {
     return (
       <div>
-        <canvas
-          width="300"
-          height="600"
-          style={{ border: '1px solid #000000' }}
-          ref={this.canvas}
-        />
+        <canvas width="500" height="600" ref={this.canvas} />
         <div>[R : Reload] [A or S : Rotate] [Arrows : Move]</div>
       </div>
     );
@@ -139,7 +154,10 @@ GamePage.propTypes = {
       }).isRequired
     ).isRequired,
     board: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number).isRequired)
-      .isRequired
+      .isRequired,
+    nextPieces: PropTypes.arrayOf(
+      PropTypes.arrayOf(PropTypes.number).isRequired
+    ).isRequired
   }).isRequired
 };
 
