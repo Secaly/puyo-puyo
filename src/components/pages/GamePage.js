@@ -43,9 +43,7 @@ class GamePage extends React.Component {
   };
 
   componentWillUnmount = () => {
-    window.addEventListener('keydown', this.handleKeys.bind(this), {
-      once: true
-    });
+    window.removeEventListener('keydown', this.handleKeys.bind(this));
   };
 
   handleKeys = event => {
