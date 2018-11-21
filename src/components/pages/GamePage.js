@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import fallPiece from '../../actions/fallPiece';
 import movePiece from '../../actions/movePiece';
 import collision from '../../actions/collision';
+import chain from '../../actions/chain';
+import { reaction, draw } from '../../gameHelper';
 import {
   RELOAD,
   MOVE_RIGHT,
@@ -20,13 +22,6 @@ const KEY = {
   40: MOVE_DOWN,
   65: ROTATE_LEFT,
   83: ROTATE_RIGHT
-};
-
-const COLOR = {
-  1: 'red',
-  2: 'blue',
-  3: 'yellow',
-  4: 'white'
 };
 
 class GamePage extends React.Component {
@@ -69,7 +64,7 @@ class GamePage extends React.Component {
   };
 
   gameUpdate = () => {
-    const { game, collision } = this.props;
+    const { game, collision, chain } = this.props;
 
     if (game.piece && game.board) {
       for (let i = 0; i < game.piece.length; i += 1) {
@@ -83,50 +78,15 @@ class GamePage extends React.Component {
           break;
         }
       }
+      let reactionList = [];
+      if (game.board.length > 0) {
+        reactionList = reaction(game.board);
+        if (reactionList.length > 0) {
+          chain(reactionList);
+        }
+      }
     }
-    this.draw();
-  };
-
-  draw = () => {
-    const { game } = this.props;
-
-    const ctx = this.canvas.current.getContext('2d');
-
-    ctx.clearRect(0, 0, 500, 600);
-    ctx.strokeRect(0, 0, 300, 600);
-    if (game.nextPieces) {
-      ctx.fillStyle = 'black';
-      ctx.font = '15px Arial';
-      ctx.fillText('Next pieces :', 350, 25);
-      ctx.fillStyle = COLOR[game.nextPieces[0][0]];
-      ctx.fillRect(350, 50, 50, 50);
-      ctx.strokeRect(350, 50, 50, 50);
-      ctx.fillStyle = COLOR[game.nextPieces[0][1]];
-      ctx.fillRect(350, 100, 50, 50);
-      ctx.strokeRect(350, 100, 50, 50);
-      ctx.fillStyle = COLOR[game.nextPieces[1][0]];
-      ctx.fillRect(450, 50, 50, 50);
-      ctx.strokeRect(450, 50, 50, 50);
-      ctx.fillStyle = COLOR[game.nextPieces[1][1]];
-      ctx.fillRect(450, 100, 50, 50);
-      ctx.strokeRect(450, 100, 50, 50);
-    }
-    if (game.piece) {
-      game.piece.forEach(item => {
-        ctx.fillStyle = COLOR[item.color];
-        ctx.fillRect(item.x, item.y, 50, 50);
-        ctx.strokeRect(item.x, item.y, 50, 50);
-      });
-      game.board.forEach((line, indexLine) => {
-        line.forEach((cell, indexColumn) => {
-          if (cell > 0) {
-            ctx.fillStyle = COLOR[cell];
-            ctx.fillRect(indexColumn * 50, indexLine * 50, 50, 50);
-            ctx.strokeRect(indexColumn * 50, indexLine * 50, 50, 50);
-          }
-        });
-      });
-    }
+    draw(game, this.canvas.current.getContext('2d'));
   };
 
   render() {
@@ -143,6 +103,7 @@ GamePage.propTypes = {
   movePiece: PropTypes.func.isRequired,
   fallPiece: PropTypes.func.isRequired,
   collision: PropTypes.func.isRequired,
+  chain: PropTypes.func.isRequired,
   game: PropTypes.shape({
     piece: PropTypes.arrayOf(
       PropTypes.shape({
@@ -169,5 +130,5 @@ function mapStatToProps(state) {
 
 export default connect(
   mapStatToProps,
-  { movePiece, fallPiece, collision }
+  { movePiece, fallPiece, collision, chain }
 )(GamePage);

@@ -7,7 +7,8 @@ import {
   MOVE_DOWN,
   ROTATE_RIGHT,
   ROTATE_LEFT,
-  COLLISION
+  COLLISION,
+  CHAIN
 } from '../types';
 
 const initialState = {
@@ -127,6 +128,16 @@ const collision = (piece, board) => {
   return newBoard.reverse();
 };
 
+const chain = (reaction, board) => {
+  const newBoard = board;
+  reaction.forEach(chain =>
+    chain.forEach(cell => {
+      newBoard[cell[0]][cell[1]] = 0;
+    })
+  );
+  return newBoard;
+};
+
 export default function game(state = initialState, action = {}) {
   switch (action.type) {
     case MOVE_PIECE:
@@ -164,8 +175,14 @@ export default function game(state = initialState, action = {}) {
               [0, 0, 0, 0, 0, 0]
             ],
             nextPieces: [
-              [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)],
-              [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
+              [
+                Math.floor(Math.random() * 4 + 1),
+                Math.floor(Math.random() * 4 + 1)
+              ],
+              [
+                Math.floor(Math.random() * 4 + 1),
+                Math.floor(Math.random() * 4 + 1)
+              ]
             ]
           };
         case MOVE_RIGHT:
@@ -295,6 +312,11 @@ export default function game(state = initialState, action = {}) {
           state.nextPieces[1],
           [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
         ]
+      };
+    case CHAIN:
+      return {
+        ...state,
+        board: chain(action.reaction, state.board)
       };
     default:
       return state;
