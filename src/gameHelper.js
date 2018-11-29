@@ -68,6 +68,8 @@ export const draw = (game, ctx) => {
     ctx.fillStyle = 'black';
     ctx.font = '15px Arial';
     ctx.fillText('Next pieces :', 350, 25);
+    ctx.fillText('Score :', 350, 225);
+    ctx.fillText(game.score, 350, 250);
     ctx.fillStyle = COLOR[game.nextPieces[0][0]];
     ctx.fillRect(350, 50, 50, 50);
     ctx.strokeRect(350, 50, 50, 50);
@@ -106,7 +108,7 @@ export const drawPause = ctx => {
   ctx.fillText('Press SPACE to start or resume the game.', 5, 293);
 };
 
-export const drawChain = (reactionList, ctx) => {
+export const drawChain = (game, reactionList, ctx) => {
   reactionList.forEach(line => {
     line.forEach(cell => {
       ctx.fillStyle = 'grey';
@@ -115,6 +117,17 @@ export const drawChain = (reactionList, ctx) => {
       ctx.strokeRect(cell[1] * 50, cell[0] * 50, 50, 50);
     });
   });
+  ctx.fillStyle = 'white';
+  ctx.font = '42px Arial';
+  const score =
+    reactionList.reduce((accumulator, line) => line.length + accumulator, 0) *
+    100 *
+    game.combo;
+  ctx.textAlign = 'center';
+  ctx.fillText(`COMBO x ${game.combo}`, 150, 270);
+  ctx.strokeText(`COMBO x ${game.combo}`, 150, 270);
+  ctx.fillText(`+ ${score} Pts !`, 150, 316);
+  ctx.strokeText(`+ ${score} Pts !`, 150, 316);
 };
 
 export const isSpaceInBoard = board =>

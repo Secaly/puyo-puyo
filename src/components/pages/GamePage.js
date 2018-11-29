@@ -90,7 +90,7 @@ class GamePage extends React.Component {
         if (isSpaceInBoard(game.board)) {
           clearTimeout(this.fallTimeout);
           draw(game, this.canvas.current.getContext('2d'));
-          setTimeout(() => fallBoard(), 500);
+          setTimeout(() => fallBoard(), 1000);
           dontDraw = true;
         }
       }
@@ -99,14 +99,14 @@ class GamePage extends React.Component {
         if (reactionList.length > 0) {
           clearTimeout(this.fallTimeout);
           draw(game, this.canvas.current.getContext('2d'));
-          drawChain(reactionList, this.canvas.current.getContext('2d'));
-          setTimeout(() => chain(reactionList), 500);
+          drawChain(game, reactionList, this.canvas.current.getContext('2d'));
+          setTimeout(() => chain(reactionList), 1000);
           setTimeout(
             () =>
               window.addEventListener('keydown', this.handleKeys, {
                 once: true
               }),
-            500
+            1000
           );
           dontDraw = true;
         }

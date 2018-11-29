@@ -50,7 +50,9 @@ const initialState = {
     [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)],
     [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
   ],
-  pause: true
+  pause: true,
+  score: 0,
+  combo: 1
 };
 
 const rotate = (pos, pieceOne, pieceTwo) => {
@@ -143,6 +145,15 @@ const chain = (reaction, board) => {
   return newBoard;
 };
 
+const score = (reaction, combo) => {
+  const comboReaction = combo + 1;
+  return (
+    reaction.reduce((accumulator, line) => line.length + accumulator, 0) *
+    100 *
+    comboReaction
+  );
+};
+
 const fallBoard = board => {
   const newBoard = board.reverse();
   _.forEach(newBoard, (line, lineIndex) => {
@@ -214,7 +225,9 @@ export default function game(state = initialState, action = {}) {
                 Math.floor(Math.random() * 4 + 1)
               ]
             ],
-            pause: true
+            pause: true,
+            score: 0,
+            combo: 1
           };
         case MOVE_RIGHT:
           if (
@@ -282,7 +295,8 @@ export default function game(state = initialState, action = {}) {
                 Math.floor(Math.random() * 4 + 1),
                 Math.floor(Math.random() * 4 + 1)
               ]
-            ]
+            ],
+            combo: 1
           };
         case ROTATE_RIGHT:
           return {
@@ -347,12 +361,15 @@ export default function game(state = initialState, action = {}) {
         nextPieces: [
           state.nextPieces[1],
           [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
-        ]
+        ],
+        combo: 1
       };
     case CHAIN:
       return {
         ...state,
-        board: chain(action.reaction, state.board)
+        board: chain(action.reaction, state.board),
+        score: state.score + score(action.reaction, state.combo),
+        combo: state.combo + 1
       };
     default:
       return state;
