@@ -161,6 +161,12 @@ export default function game(state = initialState, action = {}) {
     case MOVE_PIECE:
       switch (action.move) {
         case PAUSE:
+          if (state.gameOver) {
+            return {
+              ...state,
+              pause: false
+            };
+          }
           return {
             ...state,
             pause: !state.pause

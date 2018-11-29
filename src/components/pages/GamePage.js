@@ -58,17 +58,17 @@ class GamePage extends React.Component {
         once: true
       });
       drawGameOver(game, this.canvas.current.getContext('2d'));
-    } else if (!game.pause) {
+    } else if (game.pause) {
+      window.addEventListener('keydown', this.handleKeys, {
+        once: true
+      });
+      drawPause(this.canvas.current.getContext('2d'));
+    } else {
       window.removeEventListener('keydown', this.handleKeys, {
         once: true
       });
       clearTimeout(this.fallTimeout);
       this.gameUpdate();
-    } else {
-      window.addEventListener('keydown', this.handleKeys, {
-        once: true
-      });
-      drawPause(this.canvas.current.getContext('2d'));
     }
   };
 
@@ -112,7 +112,7 @@ class GamePage extends React.Component {
         if (isSpaceInBoard(game.board)) {
           clearTimeout(this.fallTimeout);
           draw(game, this.canvas.current.getContext('2d'));
-          setTimeout(() => fallBoard(), 1000);
+          setTimeout(() => fallBoard(), 500);
           dontDraw = true;
         }
         reactionList = reaction(game.board);
