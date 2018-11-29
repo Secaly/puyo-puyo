@@ -105,7 +105,8 @@ export const drawPause = ctx => {
   ctx.clearRect(0, 0, 500, 600);
   ctx.fillStyle = 'white';
   ctx.font = '26px Arial';
-  ctx.fillText('Press SPACE to start or resume the game.', 5, 293);
+  ctx.textAlign = 'center';
+  ctx.fillText('Press SPACE to start or resume the game.', 250, 293);
 };
 
 export const drawChain = (game, reactionList, ctx) => {
