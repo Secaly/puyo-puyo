@@ -5,8 +5,16 @@ import fallPiece from '../../actions/fallPiece';
 import movePiece from '../../actions/movePiece';
 import collision from '../../actions/collision';
 import chain from '../../actions/chain';
-import { reaction, draw } from '../../gameHelper';
+import fallBoard from '../../actions/fallBoard';
 import {
+  reaction,
+  draw,
+  drawPause,
+  drawChain,
+  isSpaceInBoard
+} from '../../gameHelper';
+import {
+  PAUSE,
   RELOAD,
   MOVE_RIGHT,
   MOVE_LEFT,
@@ -16,6 +24,7 @@ import {
 } from '../../types';
 
 const KEY = {
+  32: PAUSE,
   82: RELOAD,
   37: MOVE_LEFT,
   39: MOVE_RIGHT,
@@ -29,42 +38,79 @@ class GamePage extends React.Component {
     super(props);
 
     this.canvas = React.createRef();
+    this.handleKeys = this.handleKeys.bind(this);
   }
 
   componentDidMount = () => {
-    window.addEventListener('keydown', this.handleKeys.bind(this), {
+    window.addEventListener('keydown', this.handleKeys, {
       once: true
     });
-    this.gameStart();
+    drawPause(this.canvas.current.getContext('2d'));
   };
 
   componentDidUpdate = () => {
-    this.gameUpdate();
+    const { game } = this.props;
+    if (!game.pause) {
+      window.removeEventListener('keydown', this.handleKeys, {
+        once: true
+      });
+      clearTimeout(this.fallTimeout);
+      this.gameUpdate();
+    } else {
+      window.addEventListener('keydown', this.handleKeys, {
+        once: true
+      });
+      drawPause(this.canvas.current.getContext('2d'));
+    }
   };
 
   componentWillUnmount = () => {
-    window.removeEventListener('keydown', this.handleKeys.bind(this));
-  };
-
-  handleKeys = event => {
-    const { movePiece } = this.props;
-    movePiece(KEY[event.keyCode]);
-    window.addEventListener('keydown', this.handleKeys.bind(this), {
+    window.removeEventListener('keydown', this.handleKeys, {
       once: true
     });
   };
 
-  gameStart = () => {
-    const { fallPiece } = this.props;
-    setInterval(() => {
-      fallPiece();
-    }, 100);
+  handleKeys = event => {
+    const { game, movePiece } = this.props;
+    if (!game.pause || event.keyCode === 32) {
+      movePiece(KEY[event.keyCode]);
+    }
   };
 
   gameUpdate = () => {
-    const { game, collision, chain } = this.props;
+    const { game, collision, chain, fallPiece, fallBoard } = this.props;
+
+    let dontDraw = false;
+
+    this.fallTimeout = setTimeout(fallPiece.bind(this), 100);
 
     if (game.piece && game.board) {
+      let reactionList = [];
+      if (game.board.length > 0) {
+        if (isSpaceInBoard(game.board)) {
+          clearTimeout(this.fallTimeout);
+          draw(game, this.canvas.current.getContext('2d'));
+          setTimeout(() => fallBoard(), 500);
+          dontDraw = true;
+        }
+      }
+      if (game.board.length > 0) {
+        reactionList = reaction(game.board);
+        if (reactionList.length > 0) {
+          clearTimeout(this.fallTimeout);
+          draw(game, this.canvas.current.getContext('2d'));
+          drawChain(reactionList, this.canvas.current.getContext('2d'));
+          setTimeout(() => chain(reactionList), 500);
+          setTimeout(
+            () =>
+              window.addEventListener('keydown', this.handleKeys, {
+                once: true
+              }),
+            500
+          );
+          dontDraw = true;
+        }
+      }
       for (let i = 0; i < game.piece.length; i += 1) {
         if (
           (game.piece[i].y / 50 === Math.floor(game.piece[i].y / 50) &&
@@ -76,22 +122,22 @@ class GamePage extends React.Component {
           break;
         }
       }
-      let reactionList = [];
-      if (game.board.length > 0) {
-        reactionList = reaction(game.board);
-        if (reactionList.length > 0) {
-          chain(reactionList);
-        }
-      }
     }
-    draw(game, this.canvas.current.getContext('2d'));
+    if (!dontDraw) {
+      window.addEventListener('keydown', this.handleKeys, {
+        once: true
+      });
+      draw(game, this.canvas.current.getContext('2d'));
+    }
   };
 
   render() {
     return (
       <div>
         <canvas width="500" height="600" ref={this.canvas} />
-        <div>[R : Reload] [A or S : Rotate] [Arrows : Move]</div>
+        <div>
+          [Space : Start/Pause] [R : Restart] [A or S : Rotate] [Arrows : Move]
+        </div>
       </div>
     );
   }
@@ -102,6 +148,7 @@ GamePage.propTypes = {
   fallPiece: PropTypes.func.isRequired,
   collision: PropTypes.func.isRequired,
   chain: PropTypes.func.isRequired,
+  fallBoard: PropTypes.func.isRequired,
   game: PropTypes.shape({
     piece: PropTypes.arrayOf(
       PropTypes.shape({
@@ -116,7 +163,8 @@ GamePage.propTypes = {
       .isRequired,
     nextPieces: PropTypes.arrayOf(
       PropTypes.arrayOf(PropTypes.number).isRequired
-    ).isRequired
+    ).isRequired,
+    pause: PropTypes.bool.isRequired
   }).isRequired
 };
 
@@ -128,5 +176,5 @@ function mapStatToProps(state) {
 
 export default connect(
   mapStatToProps,
-  { movePiece, fallPiece, collision, chain }
+  { movePiece, fallPiece, collision, chain, fallBoard }
 )(GamePage);

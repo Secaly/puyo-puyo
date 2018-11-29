@@ -1,7 +1,11 @@
+import _ from 'lodash';
+
 import {
+  PAUSE,
   RELOAD,
   MOVE_PIECE,
   FALL_PIECE,
+  FALL_BOARD,
   MOVE_RIGHT,
   MOVE_LEFT,
   MOVE_DOWN,
@@ -45,7 +49,8 @@ const initialState = {
   nextPieces: [
     [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)],
     [Math.floor(Math.random() * 4 + 1), Math.floor(Math.random() * 4 + 1)]
-  ]
+  ],
+  pause: true
 };
 
 const rotate = (pos, pieceOne, pieceTwo) => {
@@ -138,10 +143,35 @@ const chain = (reaction, board) => {
   return newBoard;
 };
 
+const fallBoard = board => {
+  const newBoard = board.reverse();
+  _.forEach(newBoard, (line, lineIndex) => {
+    _.forEach(line, (cell, cellIndex) => {
+      if (cell === 0) {
+        for (let index = lineIndex + 1; index < board.length; index += 1) {
+          if (
+            newBoard[index][cellIndex] > 0 &&
+            newBoard[lineIndex][cellIndex] === 0
+          ) {
+            newBoard[lineIndex][cellIndex] = newBoard[index][cellIndex];
+            newBoard[index][cellIndex] = 0;
+          }
+        }
+      }
+    });
+  });
+  return newBoard.reverse();
+};
+
 export default function game(state = initialState, action = {}) {
   switch (action.type) {
     case MOVE_PIECE:
       switch (action.move) {
+        case PAUSE:
+          return {
+            ...state,
+            pause: !state.pause
+          };
         case RELOAD:
           return {
             piece: [
@@ -183,7 +213,8 @@ export default function game(state = initialState, action = {}) {
                 Math.floor(Math.random() * 4 + 1),
                 Math.floor(Math.random() * 4 + 1)
               ]
-            ]
+            ],
+            pause: true
           };
         case MOVE_RIGHT:
           if (
@@ -287,6 +318,11 @@ export default function game(state = initialState, action = {}) {
           ...item,
           y: item.y + 5
         }))
+      };
+    case FALL_BOARD:
+      return {
+        ...state,
+        board: fallBoard(state.board)
       };
     case COLLISION:
       return {

@@ -50,7 +50,7 @@ export const reaction = board => {
       }
     });
   });
-  const result = list.filter(chain => chain.length > 5);
+  const result = list.filter(chain => chain.length > 3);
   return result;
 };
 
@@ -98,3 +98,32 @@ export const draw = (game, ctx) => {
     });
   }
 };
+
+export const drawPause = ctx => {
+  ctx.clearRect(0, 0, 500, 600);
+  ctx.fillStyle = 'white';
+  ctx.font = '26px Arial';
+  ctx.fillText('Press SPACE to start or resume the game.', 5, 293);
+};
+
+export const drawChain = (reactionList, ctx) => {
+  reactionList.forEach(line => {
+    line.forEach(cell => {
+      ctx.fillStyle = 'grey';
+      ctx.clearRect(cell[1] * 50, cell[0] * 50, 50, 50);
+      ctx.fillRect(cell[1] * 50, cell[0] * 50, 50, 50);
+      ctx.strokeRect(cell[1] * 50, cell[0] * 50, 50, 50);
+    });
+  });
+};
+
+export const isSpaceInBoard = board =>
+  // return true or false if just one case is > 0 (full) and the next is 0 (empty)
+  board.some((line, lineIndex) =>
+    line.some(
+      (cell, cellIndex) =>
+        lineIndex + 1 < board.length &&
+        cell > 0 &&
+        board[lineIndex + 1][cellIndex] === 0
+    )
+  );
