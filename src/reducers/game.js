@@ -145,14 +145,10 @@ const chain = (reaction, board) => {
   return newBoard;
 };
 
-const score = (reaction, combo) => {
-  const comboReaction = combo + 1;
-  return (
+const score = (reaction, combo) =>
     reaction.reduce((accumulator, line) => line.length + accumulator, 0) *
     100 *
-    comboReaction
-  );
-};
+    combo
 
 const fallBoard = board => {
   const newBoard = board.reverse();
