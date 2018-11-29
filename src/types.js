@@ -3,6 +3,7 @@ export const FALL_BOARD = 'FALL_BOARD';
 export const MOVE_PIECE = 'MOVE_PIECE';
 export const COLLISION = 'COLLISION';
 export const CHAIN = 'CHAIN';
+export const GAME_OVER = 'GAME_OVER';
 
 export const MOVE_RIGHT = 'MOVE_RIGHT';
 export const MOVE_LEFT = 'MOVE_LEFT';

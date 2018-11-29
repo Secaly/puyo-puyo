@@ -110,6 +110,16 @@ export const drawPause = ctx => {
   ctx.fillText('Press SPACE to start or resume the game.', 250, 293);
 };
 
+export const drawGameOver = (game, ctx) => {
+  ctx.clearRect(0, 0, 500, 600);
+  ctx.fillStyle = 'white';
+  ctx.font = '26px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('GAME OVER', 250, 243);
+  ctx.fillText(`Your score : ${game.score}`, 250, 293);
+  ctx.fillText(`Press 'R' to restart a game.`, 250, 343);
+};
+
 export const drawChain = (game, reactionList, ctx) => {
   reactionList.forEach(line => {
     line.forEach(cell => {
@@ -142,3 +152,5 @@ export const isSpaceInBoard = board =>
         board[lineIndex + 1][cellIndex] === 0
     )
   );
+
+export const isGameOver = board => board[0][2];

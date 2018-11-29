@@ -6,12 +6,15 @@ import movePiece from '../../actions/movePiece';
 import collision from '../../actions/collision';
 import chain from '../../actions/chain';
 import fallBoard from '../../actions/fallBoard';
+import gameOver from '../../actions/gameOver';
 import {
   reaction,
   draw,
   drawPause,
+  drawGameOver,
   drawChain,
-  isSpaceInBoard
+  isSpaceInBoard,
+  isGameOver
 } from '../../gameHelper';
 import {
   PAUSE,
@@ -50,7 +53,12 @@ class GamePage extends React.Component {
 
   componentDidUpdate = () => {
     const { game } = this.props;
-    if (!game.pause) {
+    if (game.gameOver) {
+      window.addEventListener('keydown', this.handleKeys, {
+        once: true
+      });
+      drawGameOver(game, this.canvas.current.getContext('2d'));
+    } else if (!game.pause) {
       window.removeEventListener('keydown', this.handleKeys, {
         once: true
       });
@@ -82,7 +90,14 @@ class GamePage extends React.Component {
   };
 
   gameUpdate = () => {
-    const { game, collision, chain, fallPiece, fallBoard } = this.props;
+    const {
+      game,
+      collision,
+      chain,
+      fallPiece,
+      fallBoard,
+      gameOver
+    } = this.props;
 
     let dontDraw = false;
 
@@ -91,14 +106,15 @@ class GamePage extends React.Component {
     if (game.piece && game.board) {
       let reactionList = [];
       if (game.board.length > 0) {
+        if (isGameOver(game.board)) {
+          gameOver();
+        }
         if (isSpaceInBoard(game.board)) {
           clearTimeout(this.fallTimeout);
           draw(game, this.canvas.current.getContext('2d'));
           setTimeout(() => fallBoard(), 1000);
           dontDraw = true;
         }
-      }
-      if (game.board.length > 0) {
         reactionList = reaction(game.board);
         if (reactionList.length > 0) {
           clearTimeout(this.fallTimeout);
@@ -153,6 +169,7 @@ GamePage.propTypes = {
   collision: PropTypes.func.isRequired,
   chain: PropTypes.func.isRequired,
   fallBoard: PropTypes.func.isRequired,
+  gameOver: PropTypes.func.isRequired,
   game: PropTypes.shape({
     piece: PropTypes.arrayOf(
       PropTypes.shape({
@@ -180,5 +197,5 @@ function mapStatToProps(state) {
 
 export default connect(
   mapStatToProps,
-  { movePiece, fallPiece, collision, chain, fallBoard }
+  { movePiece, fallPiece, collision, chain, fallBoard, gameOver }
 )(GamePage);

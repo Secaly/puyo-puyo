@@ -12,7 +12,8 @@ import {
   ROTATE_RIGHT,
   ROTATE_LEFT,
   COLLISION,
-  CHAIN
+  CHAIN,
+  GAME_OVER
 } from '../types';
 
 const initialState = {
@@ -52,7 +53,8 @@ const initialState = {
   ],
   pause: true,
   score: 0,
-  combo: 1
+  combo: 1,
+  gameOver: false
 };
 
 const rotate = (pos, pieceOne, pieceTwo) => {
@@ -116,22 +118,6 @@ const collision = (piece, board) => {
       }
     });
   });
-  if (newBoard[11][2] > 0) {
-    return [
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0]
-    ];
-  }
   return newBoard.reverse();
 };
 
@@ -146,9 +132,9 @@ const chain = (reaction, board) => {
 };
 
 const score = (reaction, combo) =>
-    reaction.reduce((accumulator, line) => line.length + accumulator, 0) *
-    100 *
-    combo
+  reaction.reduce((accumulator, line) => line.length + accumulator, 0) *
+  100 *
+  combo;
 
 const fallBoard = board => {
   const newBoard = board.reverse();
@@ -223,7 +209,8 @@ export default function game(state = initialState, action = {}) {
             ],
             pause: true,
             score: 0,
-            combo: 1
+            combo: 1,
+            gameOver: false
           };
         case MOVE_RIGHT:
           if (
@@ -366,6 +353,11 @@ export default function game(state = initialState, action = {}) {
         board: chain(action.reaction, state.board),
         score: state.score + score(action.reaction, state.combo),
         combo: state.combo + 1
+      };
+    case GAME_OVER:
+      return {
+        ...state,
+        gameOver: true
       };
     default:
       return state;
