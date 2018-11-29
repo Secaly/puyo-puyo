@@ -67,6 +67,7 @@ export const draw = (game, ctx) => {
   if (game.nextPieces) {
     ctx.fillStyle = 'black';
     ctx.font = '15px Arial';
+    ctx.textAlign = 'start';
     ctx.fillText('Next pieces :', 350, 25);
     ctx.fillText('Score :', 350, 225);
     ctx.fillText(game.score, 350, 250);
