@@ -74,6 +74,10 @@ class GamePage extends React.Component {
     const { game, movePiece } = this.props;
     if (!game.pause || event.keyCode === 32) {
       movePiece(KEY[event.keyCode]);
+    } else {
+      window.addEventListener('keydown', this.handleKeys, {
+        once: true
+      });
     }
   };
 
