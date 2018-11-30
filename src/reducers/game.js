@@ -59,9 +59,21 @@ const initialState = {
   timer: 300000
 };
 
-const rotate = (pos, pieceOne, pieceTwo) => {
+// if (
+//   (game.piece[i].y / 50 === Math.floor(game.piece[i].y / 50) &&
+//     game.piece[i].x / 50 === Math.floor(game.piece[i].x / 50) &&
+//     game.board[game.piece[i].y / 50 + 1][game.piece[i].x / 50] > 0) ||
+//   game.piece[i].y === 545
+
+const rotate = (pos, pieceOne, pieceTwo, board) => {
   switch (pos) {
     case 0: {
+      if (
+        pieceOne.y + 50 > 545 ||
+        board[Math.ceil(pieceOne.y / 50) + 1][Math.floor(pieceOne.x / 50)] > 0
+      ) {
+        return pieceTwo;
+      }
       return {
         ...pieceTwo,
         x: pieceOne.x,
@@ -70,7 +82,13 @@ const rotate = (pos, pieceOne, pieceTwo) => {
       };
     }
     case 1: {
-      if (pieceTwo.x <= 0) {
+      if (
+        pieceTwo.x <= 0 ||
+        (Math.floor(pieceOne.x / 50) - 1 >= 0 &&
+          pieceOne.y >= 0 &&
+          board[Math.ceil(pieceOne.y / 50)][Math.floor(pieceOne.x / 50) - 1] >
+            0)
+      ) {
         return pieceTwo;
       }
       return {
@@ -89,7 +107,12 @@ const rotate = (pos, pieceOne, pieceTwo) => {
       };
     }
     case 3: {
-      if (pieceTwo.x >= 250) {
+      if (
+        pieceTwo.x >= 250 ||
+        (Math.floor(pieceOne.x / 50) + 1 < 6 &&
+          pieceOne.y >= 0 &&
+          board[Math.ceil(pieceOne.y / 50)][Math.ceil(pieceOne.x / 50) + 1] > 0)
+      ) {
         return pieceTwo;
       }
       return {
@@ -169,14 +192,6 @@ export default function game(state = initialState, action = {}) {
               pause: false
             };
           }
-          // if (state.timer <= 0) {
-          //   return {
-          //     ...state,
-          //     pause: !state.pause,
-          //     startTimer: new Date().getTime(),
-          //     timer: 300000
-          //   };
-          // }
           return {
             ...state,
             pause: !state.pause,
@@ -308,7 +323,8 @@ export default function game(state = initialState, action = {}) {
               rotate(
                 (state.piece[1].position + 3) % 4,
                 state.piece[0],
-                state.piece[1]
+                state.piece[1],
+                state.board
               )
             ]
           };
@@ -320,7 +336,8 @@ export default function game(state = initialState, action = {}) {
               rotate(
                 (state.piece[1].position + 5) % 4,
                 state.piece[0],
-                state.piece[1]
+                state.piece[1],
+                state.board
               )
             ]
           };
