@@ -101,10 +101,16 @@ class GamePage extends React.Component {
 
     let dontDraw = false;
 
-    this.fallTimeout = setTimeout(fallPiece.bind(this), 100);
+    this.fallTimeout = setTimeout(
+      fallPiece.bind(this),
+      100 / (10 - Math.floor((game.timer % (1000 * 60 * 60)) / (1000 * 30)))
+    );
 
     if (game.piece && game.board) {
       let reactionList = [];
+      if (game.startTimer && game.timer <= 0) {
+        gameOver();
+      }
       if (game.board.length > 0) {
         if (isGameOver(game.board)) {
           gameOver();

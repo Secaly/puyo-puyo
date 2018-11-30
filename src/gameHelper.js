@@ -71,6 +71,20 @@ export const draw = (game, ctx) => {
     ctx.fillText('Next pieces :', 350, 25);
     ctx.fillText('Score :', 350, 225);
     ctx.fillText(game.score, 350, 250);
+    ctx.fillText('Timer :', 350, 325);
+    ctx.fillText(
+      `${Math.floor(
+        (game.timer % (1000 * 60 * 60)) / (1000 * 60)
+      )} minutes ${Math.floor((game.timer % (1000 * 60)) / 1000)} secondes`,
+      350,
+      350
+    );
+    ctx.fillText('Speed :', 350, 425);
+    ctx.fillText(
+      `x ${10 - Math.floor((game.timer % (1000 * 60 * 60)) / (1000 * 30))}`,
+      350,
+      450
+    );
     ctx.fillStyle = COLOR[game.nextPieces[0][0]];
     ctx.fillRect(350, 50, 50, 50);
     ctx.strokeRect(350, 50, 50, 50);

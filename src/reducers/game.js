@@ -54,7 +54,9 @@ const initialState = {
   pause: true,
   score: 0,
   combo: 1,
-  gameOver: false
+  gameOver: false,
+  startTimer: new Date().getTime() + 300000,
+  timer: 300000
 };
 
 const rotate = (pos, pieceOne, pieceTwo) => {
@@ -167,9 +169,18 @@ export default function game(state = initialState, action = {}) {
               pause: false
             };
           }
+          // if (state.timer <= 0) {
+          //   return {
+          //     ...state,
+          //     pause: !state.pause,
+          //     startTimer: new Date().getTime(),
+          //     timer: 300000
+          //   };
+          // }
           return {
             ...state,
-            pause: !state.pause
+            pause: !state.pause,
+            startTimer: new Date().getTime() + 300000 - (300000 - state.timer)
           };
         case RELOAD:
           return {
@@ -216,7 +227,9 @@ export default function game(state = initialState, action = {}) {
             pause: true,
             score: 0,
             combo: 1,
-            gameOver: false
+            gameOver: false,
+            startTimer: new Date().getTime() + 300000,
+            timer: 300000
           };
         case MOVE_RIGHT:
           if (
@@ -320,7 +333,8 @@ export default function game(state = initialState, action = {}) {
         piece: state.piece.map(item => ({
           ...item,
           y: item.y + 5
-        }))
+        })),
+        timer: state.startTimer - new Date().getTime()
       };
     case FALL_BOARD:
       return {
