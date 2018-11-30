@@ -59,12 +59,6 @@ const initialState = {
   timer: 300000
 };
 
-// if (
-//   (game.piece[i].y / 50 === Math.floor(game.piece[i].y / 50) &&
-//     game.piece[i].x / 50 === Math.floor(game.piece[i].x / 50) &&
-//     game.board[game.piece[i].y / 50 + 1][game.piece[i].x / 50] > 0) ||
-//   game.piece[i].y === 545
-
 const rotate = (pos, pieceOne, pieceTwo, board) => {
   switch (pos) {
     case 0: {
@@ -255,7 +249,8 @@ export default function game(state = initialState, action = {}) {
             ] > 0 ||
             state.board[Math.abs(Math.ceil(state.piece[1].y / 50))][
               state.piece[1].x / 50 + 1
-            ] > 0
+            ] > 0 ||
+            state.combo > 1
           ) {
             return state;
           }
@@ -275,7 +270,8 @@ export default function game(state = initialState, action = {}) {
             ] > 0 ||
             state.board[Math.abs(Math.ceil(state.piece[1].y / 50))][
               state.piece[1].x / 50 - 1
-            ] > 0
+            ] > 0 ||
+            state.combo > 1
           ) {
             return state;
           }
@@ -287,6 +283,9 @@ export default function game(state = initialState, action = {}) {
             }))
           };
         case MOVE_DOWN:
+          if (state.combo > 1) {
+            return state;
+          }
           return {
             ...state,
             piece: [
@@ -316,6 +315,9 @@ export default function game(state = initialState, action = {}) {
             combo: 1
           };
         case ROTATE_RIGHT:
+          if (state.combo > 1) {
+            return state;
+          }
           return {
             ...state,
             piece: [
@@ -329,6 +331,9 @@ export default function game(state = initialState, action = {}) {
             ]
           };
         case ROTATE_LEFT:
+          if (state.combo > 1) {
+            return state;
+          }
           return {
             ...state,
             piece: [
@@ -351,7 +356,8 @@ export default function game(state = initialState, action = {}) {
           ...item,
           y: item.y + 5
         })),
-        timer: state.startTimer - new Date().getTime()
+        timer: state.startTimer - new Date().getTime(),
+        combo: 1
       };
     case FALL_BOARD:
       return {
