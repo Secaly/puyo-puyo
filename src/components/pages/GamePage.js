@@ -1,12 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import fallPiece from '../../actions/fallPiece';
-import movePiece from '../../actions/movePiece';
-import collision from '../../actions/collision';
-import chain from '../../actions/chain';
-import fallBoard from '../../actions/fallBoard';
-import gameOver from '../../actions/gameOver';
+import React, { useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+import fallPiece from "../../actions/fallPiece";
+import movePiece from "../../actions/movePiece";
+import collision from "../../actions/collision";
+import chain from "../../actions/chain";
+import fallBoard from "../../actions/fallBoard";
+import gameOver from "../../actions/gameOver";
 import {
   reaction,
   draw,
@@ -15,7 +15,7 @@ import {
   drawChain,
   isSpaceInBoard,
   isGameOver
-} from '../../gameHelper';
+} from "../../gameHelper";
 import {
   PAUSE,
   RELOAD,
@@ -24,7 +24,7 @@ import {
   MOVE_DOWN,
   ROTATE_LEFT,
   ROTATE_RIGHT
-} from '../../types';
+} from "../../types";
 
 const KEY = {
   32: PAUSE,
@@ -36,100 +36,129 @@ const KEY = {
   83: ROTATE_RIGHT
 };
 
-class GamePage extends React.Component {
-  constructor(props) {
-    super(props);
+const GamePage = props => {
+  // constructor(props) {
+  //   super(props);
 
-    this.canvas = React.createRef();
-    this.handleKeys = this.handleKeys.bind(this);
-  }
+  //   this.canvas = React.createRef();
+  //   this.handleKeys = this.handleKeys.bind(this);
+  // }
 
-  componentDidMount = () => {
-    window.addEventListener('keydown', this.handleKeys, {
+  const canvas = useRef(null);
+
+  // componentDidMount = () => {
+  //   window.addEventListener("keydown", this.handleKeys, {
+  //     once: true
+  //   });
+  //   drawPause(this.canvas.current.getContext("2d"));
+  // };
+
+  useEffect(() => {
+    // key handler hook
+    window.addEventListener("keydown", handleKeys(), {
       once: true
     });
-    drawPause(this.canvas.current.getContext('2d'));
-  };
+    return () => {
+      window.removeEventListener("keydown", handleKeys(), {
+        once: true
+      });
+    };
+  }, []);
 
-  componentDidUpdate = () => {
-    const { game } = this.props;
-    window.removeEventListener('keydown', this.handleKeys, {
+  useEffect(() => {
+    drawPause(canvas.current.getContext("2d"));
+  }, []);
+
+  useEffect(() => {
+    window.removeEventListener("keydown", handleKeys(), {
       once: true
     });
-    if (game.gameOver) {
-      window.addEventListener('keydown', this.handleKeys, {
+    if (props.game.gameOver) {
+      window.addEventListener("keydown", handleKeys(), {
         once: true
       });
-      drawGameOver(game, this.canvas.current.getContext('2d'));
-    } else if (game.pause) {
-      window.addEventListener('keydown', this.handleKeys, {
+      drawGameOver(props.game, canvas.current.getContext("2d"));
+    } else if (props.game.pause) {
+      window.addEventListener("keydown", handleKeys(), {
         once: true
       });
-      drawPause(this.canvas.current.getContext('2d'));
+      drawPause(canvas.current.getContext("2d"));
     } else {
-      clearTimeout(this.fallTimeout);
-      this.gameUpdate();
+      clearTimeout(fallTimeout());
+      gameUpdate();
+    }
+  });
+
+  // componentDidUpdate = () => {
+  //   const { game } = this.props;
+  //   window.removeEventListener("keydown", this.handleKeys, {
+  //     once: true
+  //   });
+  //   if (game.gameOver) {
+  //     window.addEventListener("keydown", this.handleKeys, {
+  //       once: true
+  //     });
+  //     drawGameOver(game, this.canvas.current.getContext("2d"));
+  //   } else if (game.pause) {
+  //     window.addEventListener("keydown", this.handleKeys, {
+  //       once: true
+  //     });
+  //     drawPause(this.canvas.current.getContext("2d"));
+  //   } else {
+  //     clearTimeout(this.fallTimeout);
+  //     this.gameUpdate();
+  //   }
+  // };
+
+  // componentWillUnmount = () => {
+  //   window.removeEventListener("keydown", this.handleKeys, {
+  //     once: true
+  //   });
+  // };
+
+  const handleKeys = event => {
+    if (!props.game.pause || event.keyCode === 32) {
+      props.movePiece(KEY[event.keyCode]);
+    } else {
+      window.addEventListener("keydown", handleKeys(), {
+        once: true
+      });
     }
   };
 
-  componentWillUnmount = () => {
-    window.removeEventListener('keydown', this.handleKeys, {
-      once: true
-    });
-  };
-
-  handleKeys = event => {
-    const { game, movePiece } = this.props;
-    if (!game.pause || event.keyCode === 32) {
-      movePiece(KEY[event.keyCode]);
-    } else {
-      window.addEventListener('keydown', this.handleKeys, {
-        once: true
-      });
-    }
-  };
-
-  gameUpdate = () => {
-    const {
-      game,
-      collision,
-      chain,
-      fallPiece,
-      fallBoard,
-      gameOver
-    } = this.props;
-
-    let dontDraw = false;
-
-    this.fallTimeout = setTimeout(
+  const fallTimeout = () =>
+    setTimeout(
       fallPiece.bind(this),
       100 / (10 - Math.floor((game.timer % (1000 * 60 * 60)) / (1000 * 30)))
     );
 
-    if (game.piece && game.board) {
+  const gameUpdate = () => {
+    let dontDraw = false;
+
+    if (props.game.piece && props.game.board) {
       let reactionList = [];
-      if (game.startTimer && game.timer <= 0) {
-        gameOver();
+      if (props.game.startTimer && props.game.timer <= 0) {
+        props.gameOver();
       }
-      if (game.board.length > 0) {
-        if (isGameOver(game.board)) {
-          gameOver();
+      if (props.game.board.length > 0) {
+        if (props.isGameOver(props.game.board)) {
+          props.gameOver();
         }
-        if (isSpaceInBoard(game.board)) {
-          clearTimeout(this.fallTimeout);
-          draw(game, this.canvas.current.getContext('2d'));
-          setTimeout(() => fallBoard(), 100);
+        if (props.isSpaceInBoard(props.game.board)) {
+          clearTimeout(fallTimeout());
+          props.draw(props.game, canvas.current.getContext("2d"));
+          setTimeout(() => props.fallBoard(), 100);
           dontDraw = true;
         }
-        reactionList = reaction(game.board);
+        reactionList = reaction(props.game.board);
         if (reactionList.length > 0) {
-          clearTimeout(this.fallTimeout);
-          draw(game, this.canvas.current.getContext('2d'));
-          drawChain(game, reactionList, this.canvas.current.getContext('2d'));
-          setTimeout(() => chain(reactionList), 1000);
+          clearTimeout(fallTimeout());
+          draw(props.game, canvas.current.getContext("2d"));
+          drawChain(props.game, reactionList, canvas.current.getContext("2d"));
+          setTimeout(() => props.chain(reactionList), 1000);
           setTimeout(
             () =>
-              window.addEventListener('keydown', this.handleKeys, {
+              window.addEventListener("keydown", handleKeys(), {
                 once: true
               }),
             1000
@@ -137,37 +166,39 @@ class GamePage extends React.Component {
           dontDraw = true;
         }
       }
-      for (let i = 0; i < game.piece.length; i += 1) {
+      for (let i = 0; i < props.game.piece.length; i += 1) {
         if (
-          (game.piece[i].y / 50 === Math.floor(game.piece[i].y / 50) &&
-            game.piece[i].x / 50 === Math.floor(game.piece[i].x / 50) &&
-            game.board[game.piece[i].y / 50 + 1][game.piece[i].x / 50] > 0) ||
-          game.piece[i].y === 545
+          (props.game.piece[i].y / 50 ===
+            Math.floor(props.game.piece[i].y / 50) &&
+            props.game.piece[i].x / 50 ===
+              Math.floor(props.game.piece[i].x / 50) &&
+            props.game.board[props.game.piece[i].y / 50 + 1][
+              props.game.piece[i].x / 50
+            ] > 0) ||
+          props.game.piece[i].y === 545
         ) {
-          collision(game.piece);
+          props.collision(props.game.piece);
           break;
         }
       }
     }
     if (!dontDraw) {
-      window.addEventListener('keydown', this.handleKeys, {
+      window.addEventListener("keydown", handleKeys(), {
         once: true
       });
-      draw(game, this.canvas.current.getContext('2d'));
+      props.draw(props.game, canvas.current.getContext("2d"));
     }
   };
 
-  render() {
-    return (
+  return (
+    <div>
+      <canvas width="500" height="600" ref={canvas} />
       <div>
-        <canvas width="500" height="600" ref={this.canvas} />
-        <div>
-          [Space : Start/Pause] [R : Restart] [A or S : Rotate] [Arrows : Move]
-        </div>
+        [Space : Start/Pause] [R : Restart] [A or S : Rotate] [Arrows : Move]
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 GamePage.propTypes = {
   movePiece: PropTypes.func.isRequired,
