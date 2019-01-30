@@ -44,7 +44,7 @@ const GamePage = props => {
   //   this.handleKeys = this.handleKeys.bind(this);
   // }
 
-  const canvas = useRef(null);
+  const canvas = useRef();
 
   // componentDidMount = () => {
   //   window.addEventListener("keydown", this.handleKeys, {
@@ -55,11 +55,22 @@ const GamePage = props => {
 
   useEffect(() => {
     // key handler hook
-    window.addEventListener("keydown", handleKeys(), {
+
+    const handleKeys = event => {
+      if (!props.game.pause || event.keyCode === 32) {
+        props.movePiece(KEY[event.keyCode]);
+      } else {
+        window.addEventListener("keydown", handleKeys, {
+          once: true
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeys, {
       once: true
     });
     return () => {
-      window.removeEventListener("keydown", handleKeys(), {
+      window.removeEventListener("keydown", handleKeys, {
         once: true
       });
     };
@@ -70,16 +81,26 @@ const GamePage = props => {
   }, []);
 
   useEffect(() => {
-    window.removeEventListener("keydown", handleKeys(), {
+    const handleKeys = event => {
+      if (!props.game.pause || event.keyCode === 32) {
+        props.movePiece(KEY[event.keyCode]);
+      } else {
+        window.addEventListener("keydown", handleKeys, {
+          once: true
+        });
+      }
+    };
+
+    window.removeEventListener("keydown", handleKeys, {
       once: true
     });
     if (props.game.gameOver) {
-      window.addEventListener("keydown", handleKeys(), {
+      window.addEventListener("keydown", handleKeys, {
         once: true
       });
       drawGameOver(props.game, canvas.current.getContext("2d"));
     } else if (props.game.pause) {
-      window.addEventListener("keydown", handleKeys(), {
+      window.addEventListener("keydown", handleKeys, {
         once: true
       });
       drawPause(canvas.current.getContext("2d"));
@@ -116,20 +137,11 @@ const GamePage = props => {
   //   });
   // };
 
-  const handleKeys = event => {
-    if (!props.game.pause || event.keyCode === 32) {
-      props.movePiece(KEY[event.keyCode]);
-    } else {
-      window.addEventListener("keydown", handleKeys(), {
-        once: true
-      });
-    }
-  };
-
   const fallTimeout = () =>
     setTimeout(
       fallPiece.bind(this),
-      100 / (10 - Math.floor((game.timer % (1000 * 60 * 60)) / (1000 * 30)))
+      100 /
+        (10 - Math.floor((props.game.timer % (1000 * 60 * 60)) / (1000 * 30)))
     );
 
   const gameUpdate = () => {
@@ -141,12 +153,12 @@ const GamePage = props => {
         props.gameOver();
       }
       if (props.game.board.length > 0) {
-        if (props.isGameOver(props.game.board)) {
+        if (isGameOver(props.game.board)) {
           props.gameOver();
         }
-        if (props.isSpaceInBoard(props.game.board)) {
+        if (isSpaceInBoard(props.game.board)) {
           clearTimeout(fallTimeout());
-          props.draw(props.game, canvas.current.getContext("2d"));
+          draw(props.game, canvas.current.getContext("2d"));
           setTimeout(() => props.fallBoard(), 100);
           dontDraw = true;
         }
@@ -186,7 +198,7 @@ const GamePage = props => {
       window.addEventListener("keydown", handleKeys(), {
         once: true
       });
-      props.draw(props.game, canvas.current.getContext("2d"));
+      draw(props.game, canvas.current.getContext("2d"));
     }
   };
 
