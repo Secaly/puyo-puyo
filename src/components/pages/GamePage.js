@@ -37,13 +37,6 @@ const KEY = {
 };
 
 const GamePage = props => {
-  // constructor(props) {
-  //   super(props);
-
-  //   this.canvas = React.createRef();
-  //   this.handleKeys = this.handleKeys.bind(this);
-  // }
-
   const canvas = useRef();
 
   // componentDidMount = () => {
